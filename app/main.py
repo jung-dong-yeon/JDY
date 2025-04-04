@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-from recommend import get_recommended_teams  # ✅ 경로 체크!
+from .recommend import get_recommended_teams
 
 app = FastAPI()
 
