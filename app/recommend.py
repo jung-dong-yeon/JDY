@@ -1,7 +1,9 @@
 import pandas as pd
 import joblib
+import os
 
-model = joblib.load("team_recommender.pkl")
+model_path = os.path.join(os.path.dirname(__file__), "../team_recommender.pkl")
+model = joblib.load(model_path)
 
 def predict_match_score(user, team):
     test = pd.DataFrame([{

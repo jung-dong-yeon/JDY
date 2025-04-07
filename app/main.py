@@ -1,5 +1,3 @@
-# app/main.py
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
@@ -26,4 +24,3 @@ class RecommendRequest(BaseModel):
 def recommend_teams(req: RecommendRequest):
     recommended = get_recommended_teams(req.user.dict(), [t.dict() for t in req.teams])
     return recommended
-
