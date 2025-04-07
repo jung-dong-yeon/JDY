@@ -26,3 +26,8 @@ class RecommendRequest(BaseModel):
 def recommend_teams(req: RecommendRequest):
     recommended = get_recommended_teams(req.user.dict(), [t.dict() for t in req.teams])
     return recommended
+
+import os
+if not os.path.exists("team_recommender.pkl"):
+    from . import recommend_model
+    recommend_model.train_model()
