@@ -1,7 +1,9 @@
+# app/main.py
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-from .recommend import get_recommended_teams
+from recommend import get_recommended_teams
 
 app = FastAPI()
 
