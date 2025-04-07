@@ -32,7 +32,7 @@ class RecommendRequest(BaseModel):
     teams: List[Team]  # 비교할 팀 리스트
 
 # POST 요청 핸들러 (추천 실행)
-@app.post("/api/recommend")
+@app.post("/api/recommend/teams")
 def recommend_teams(req: RecommendRequest):
     # 추천 결과 계산
     recommended = get_recommended_teams(req.user.dict(), [t.dict() for t in req.teams])
