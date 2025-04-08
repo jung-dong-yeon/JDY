@@ -45,6 +45,7 @@ def get_recommended_teams(user: dict, teams: list):
             "team_id": tid,
             "score": float(round(sum(scores) / len(scores), 2)),
             "prediction": int(round(sum(team_preds[tid]) / len(team_preds[tid]))),
+            "badge": "추천" if (sum(scores) / len(scores)) >= 0.8 else ""  # ✅ 추천 뱃지 조건
         }
         for tid, scores in team_scores.items()
     ]
