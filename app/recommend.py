@@ -11,7 +11,7 @@ model, feature_columns = joblib.load(model_path)
 def get_recommended_teams(user: dict, teams: list):
     result = []
 
-    # 🛠️ userSkill 파싱 (문자열로 오면 JSON으로 변환)
+    # 🛠️ userSkill 파싱
     user_skills = user.get("userSkill", [])
     if isinstance(user_skills, str):
         try:
@@ -21,24 +21,27 @@ def get_recommended_teams(user: dict, teams: list):
 
     for team in teams:
         # ✅ 팀에서 모집하는 기술 분리
-        skills = team["recruitment_skill"].split(",")
-        skills = [s.strip() for s in skills]
-
+        team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
+        
         test_rows = []
-        for skill in skills:
-            test_rows.append({
-                "skill": skill,
-                "region": team["region"],
-                "target": team["goal"]
-            })
+        for user_skill in user_skills:
+            for team_skill in team_skills:
+                test_rows.append({
+                    "skill": team_skill,
+                    "region": team["region"],
+                    "target": team["goal"]
+                })
+
+        if not test_rows:
+            continue  # 빈 팀은 건너뜀
 
         df = pd.DataFrame(test_rows)
         df_encoded = pd.get_dummies(df)
 
-        # ✅ 모델이 학습한 feature 컬럼 기준으로 정렬
+        # ✅ 모델 학습 기준 컬럼 정렬
         df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)
 
-        # ✅ 각 row에 대한 추천 확률 예측 후 평균
+        # ✅ 추천 점수 계산
         probas = model.predict_proba(df_encoded)[:, 1]
         avg_score = float(round(probas.mean(), 2))
 
@@ -49,5 +52,4 @@ def get_recommended_teams(user: dict, teams: list):
             "badge": "추천" if avg_score >= 0.6 else ""
         })
 
-    # ✅ 높은 점수 순 정렬
     return sorted(result, key=lambda x: x["score"], reverse=True)
