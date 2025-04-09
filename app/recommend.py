@@ -20,7 +20,7 @@ def get_recommended_teams(user: dict, teams: list):
             test_rows.append({
                 "skill": skill,
                 "region": team["region"],
-                "target": team["target"]
+                "target": team["goal"]
             })
 
         # 입력 데이터프레임 생성 및 인코딩
