@@ -12,7 +12,7 @@ def get_recommended_teams(user: dict, teams: list):
 
     for team in teams:
         # 프론트에서 보내는 필드명 그대로 사용 (skill: 문자열, teamId: 정수)
-        skills = team["skill"].split(",")  # 예: "AI, 프론트엔드"
+        skills = team["recruitment_skill"].split(",")  # 예: "AI, 프론트엔드"
         skills = [s.strip() for s in skills]
 
         test_rows = []
