@@ -19,14 +19,16 @@ def get_recommended_teams(user: dict, teams: list):
                 "target": team["goal"]
             })
 
+        # 🧩 데이터프레임 생성 및 인코딩
         df = pd.DataFrame(test_rows)
         df_encoded = pd.get_dummies(df)
-        df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)  # ✅ 인코딩 정렬
+        df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)  # ✅ 학습 시 feature에 맞게 정렬
 
-        # 예측 확률
+        # ✅ 예측 확률 계산
         probas = model.predict_proba(df_encoded)[:, 1]
         avg_score = float(round(probas.mean(), 2))
 
+        # ✅ 결과 저장
         result.append({
             "team_id": team["team_id"],
             "score": avg_score,
@@ -34,4 +36,5 @@ def get_recommended_teams(user: dict, teams: list):
             "badge": "추천" if avg_score >= 0.6 else ""
         })
 
+    # ✅ 점수 기준 정렬
     return sorted(result, key=lambda x: x["score"], reverse=True)
