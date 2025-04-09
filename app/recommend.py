@@ -11,7 +11,7 @@ def get_recommended_teams(user: dict, teams: list):
     result = []
 
     for team in teams:
-        skills = team["skill"].split(",")
+        skills = team["recruitment_skill"].split(",")
         skills = [s.strip() for s in skills]
 
         test_rows = []
