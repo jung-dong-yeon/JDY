@@ -9,22 +9,20 @@ model, feature_columns = joblib.load(model_path)
 def get_recommended_teams(user: dict, teams: list):
     results = []
 
-    user_skills = [s.strip() for s in user.get("skills", []) if s.strip()]
-    if not user_skills:
-        return []  # 유저 스킬이 없으면 추천 불가
+    user_skills = user.get("skills", [])
+    user_region = user.get("region", "")
+    user_target = user.get("target", "")
 
     for team in teams:
-        team_skills = [s.strip() for s in team.get("recruitment_skill", "").split(",") if s.strip()]
-        if not team_skills:
-            continue
-
+        team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         test_rows = []
+
         for user_skill in user_skills:
             for team_skill in team_skills:
                 test_rows.append({
                     "skill": team_skill,
-                    "region": team.get("region", ""),
-                    "target": team.get("goal", "")
+                    "region": team["region"],
+                    "target": team["goal"]
                 })
 
         if not test_rows:
@@ -34,16 +32,21 @@ def get_recommended_teams(user: dict, teams: list):
         df_encoded = pd.get_dummies(df)
         df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)
 
-        scores = model.predict(df_encoded)
-        base_score = float(round(scores.mean(), 4))  # ⬅ 소수점 4자리까지 계산하고 최종만 round(2)
+        base_score = float(round(model.predict(df_encoded).mean(), 2))
 
-        match_count = sum(1 for s in user_skills if s in team_skills)
-        match_ratio = match_count / len(user_skills)
+        # 유사도 계산
+        skill_match_ratio = len(set(user_skills) & set(team_skills)) / max(len(user_skills), 1)
+        region_match = 1.0 if user_region == team["region"] else 0.0
+        target_match = 1.0 if user_target == team["goal"] else 0.0
 
-        final_score = round(base_score * match_ratio, 2)
+        # 최종 점수 계산 (현실적 가중치 조합)
+        final_score = round(
+            (0.5 * base_score) + (0.3 * skill_match_ratio) + (0.1 * region_match) + (0.1 * target_match),
+            2
+        )
 
         results.append({
-            "team_id": team.get("team_id"),
+            "team_id": team["team_id"],
             "score": final_score,
             "prediction": 1 if final_score >= 0.5 else 0,
             "badge": "추천" if final_score >= 0.6 else ""
