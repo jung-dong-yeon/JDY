@@ -15,22 +15,14 @@ def train_model():
         {"skill": "DBA", "region": "제주도", "target": "1등", "match": 0},
     ])
 
-    # 인코딩
-    X_encoded = pd.get_dummies(data[["skill", "region", "target"]])
+    X = pd.get_dummies(data[["skill", "region", "target"]])
     y = data["match"]
 
-    # 모델 학습
-    from sklearn.ensemble import RandomForestRegressor
-    model = RandomForestRegressor(
-        n_estimators=200,
-        max_depth=5,
-        random_state=42
-    )
-    model.fit(X_encoded, y)
+    model = RandomForestRegressor(n_estimators=200, max_depth=5, random_state=42)
+    model.fit(X, y)
 
-    # 저장
     model_path = os.path.join(os.path.dirname(__file__), "team_recommender.pkl")
-    joblib.dump((model, X_encoded.columns), model_path)
+    joblib.dump((model, X.columns), model_path)
     print("✅ 모델 저장 완료:", model_path)
 
 if __name__ == "__main__":
