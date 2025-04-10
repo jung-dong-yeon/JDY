@@ -1,35 +1,29 @@
-# train.py (모델 학습 파일)
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 import joblib
 import os
 
-# 다양한 조합의 학습 데이터 생성
-data = []
-skills = ["AI", "웹풀스택", "게임서버", "프론트엔드", "백엔드", "블록체인", "QA"]
-regions = ["서울", "대전", "부산", "울산", "제주도"]
-targets = ["경험쌓기", "상금", "1등"]
+def train_model():
+    data = pd.DataFrame([
+        {"skill": "AI", "region": "서울", "target": "경험쌓기", "match": 1},
+        {"skill": "웹풀스택", "region": "서울", "target": "경험쌓기", "match": 1},
+        {"skill": "AI", "region": "서울", "target": "상금", "match": 1},
+        {"skill": "블록체인", "region": "서울", "target": "경험쌓기", "match": 1},
+        {"skill": "게임서버", "region": "대전", "target": "상금", "match": 0},
+        {"skill": "프론트엔드", "region": "부산", "target": "1등", "match": 0},
+        {"skill": "QA", "region": "울산", "target": "상금", "match": 0},
+        {"skill": "DBA", "region": "제주도", "target": "1등", "match": 0},
+    ])
 
-for skill in skills:
-    for region in regions:
-        for target in targets:
-            match = 1 if skill in ["AI", "웹풀스택"] and region == "서울" and target in ["상금", "1등"] else 0
-            data.append({
-                "skill": skill,
-                "region": region,
-                "target": target,
-                "match": match
-            })
+    X = pd.get_dummies(data[["skill", "region", "target"]])
+    y = data["match"]
 
-df = pd.DataFrame(data)
-X = pd.get_dummies(df[["skill", "region", "target"]])
-y = df["match"]
+    model = RandomForestRegressor(n_estimators=200, max_depth=5, random_state=42)
+    model.fit(X, y)
 
-model = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=42)
-model.fit(X, y)
+    model_path = os.path.join(os.path.dirname(__file__), "team_recommender.pkl")
+    joblib.dump((model, X.columns), model_path)
+    print("✅ 모델 저장 완료:", model_path)
 
-# 모델과 feature 컬럼 저장
-model_path = os.path.join(os.getcwd(), "team_recommender.pkl")
-joblib.dump((model, X.columns), model_path)
-
-print("✅ 모델 학습 완료")
+if __name__ == "__main__":
+    train_model()
