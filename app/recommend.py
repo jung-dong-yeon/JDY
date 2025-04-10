@@ -50,11 +50,10 @@ def get_recommended_teams(user: dict, teams: list):
             2
         )
 
-        results.append({
-            "team_id": team["team_id"],
-            "score": final_score,
-            "prediction": 1 if final_score >= 0.5 else 0,
-            "badge": "추천" if final_score >= 0.6 else ""
-        })
+        final_score = round(
+    (0.2 * base_score) + (0.5 * skill_match_ratio) + (0.2 * region_match) + (0.1 * target_match),
+    2
+)
+
 
     return sorted(results, key=lambda x: x["score"], reverse=True)
