@@ -43,17 +43,16 @@ def get_recommended_teams(user: dict, teams: list):
 
         # 🔥 조정된 가중치 기반 최종 점수
         final_score = round(
-            (0.45 * base_score) +
-            (0.30 * skill_match_ratio) +
-            (0.15 * region_match) +
-            (0.10 * target_match),
-            2
-        )
-
-        final_score = round(
-    (0.2 * base_score) + (0.5 * skill_match_ratio) + (0.2 * region_match) + (0.1 * target_match),
+    (0.2 * base_score) + (0.4 * skill_match_ratio) + (0.25 * region_match) + (0.15 * target_match),
     2
 )
 
+
+        results.append({
+            "team_id": team["team_id"],
+            "score": final_score,
+            "prediction": 1 if final_score >= 0.5 else 0,
+            "badge": "추천" if final_score >= 0.6 else ""
+        })
 
     return sorted(results, key=lambda x: x["score"], reverse=True)
