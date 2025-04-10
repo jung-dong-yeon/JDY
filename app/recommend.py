@@ -28,10 +28,12 @@ def get_recommended_teams(user: dict, teams: list):
         if not test_rows:
             continue
 
+        # 예측용 데이터 준비
         df = pd.DataFrame(test_rows)
         df_encoded = pd.get_dummies(df)
         df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)
 
+        # 랜덤포레스트 예측 점수
         base_score = float(round(model.predict(df_encoded).mean(), 2))
 
         # 유사도 계산
@@ -39,9 +41,12 @@ def get_recommended_teams(user: dict, teams: list):
         region_match = 1.0 if user_region == team["region"] else 0.0
         target_match = 1.0 if user_target == team["goal"] else 0.0
 
-        # 최종 점수 계산 (현실적 가중치 조합)
+        # 🔥 조정된 가중치 기반 최종 점수
         final_score = round(
-            (0.5 * base_score) + (0.3 * skill_match_ratio) + (0.1 * region_match) + (0.1 * target_match),
+            (0.45 * base_score) +
+            (0.30 * skill_match_ratio) +
+            (0.15 * region_match) +
+            (0.10 * target_match),
             2
         )
 
