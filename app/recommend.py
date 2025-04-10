@@ -36,17 +36,19 @@ def get_recommended_teams(user: dict, teams: list):
         # 랜덤포레스트 예측 점수
         base_score = float(round(model.predict(df_encoded).mean(), 2))
 
-        # 유사도 계산
-        skill_match_ratio = len(set(user_skills) & set(team_skills)) / max(len(user_skills), 1)
+        # 유사도 계산 (스킬 교집합 비율 개선)
+        skill_match_ratio = len(set(user_skills) & set(team_skills)) / max(len(set(user_skills + team_skills)), 1)
         region_match = 1.0 if user_region == team["region"] else 0.0
         target_match = 1.0 if user_target == team["goal"] else 0.0
 
-        # 🔥 조정된 가중치 기반 최종 점수
+        # 최종 점수 계산 (현실적인 가중치 적용)
         final_score = round(
-    (0.2 * base_score) + (0.4 * skill_match_ratio) + (0.25 * region_match) + (0.15 * target_match),
-    2
-)
-
+            (0.2 * base_score) +
+            (0.4 * skill_match_ratio) +
+            (0.25 * region_match) +
+            (0.15 * target_match),
+            2
+        )
 
         results.append({
             "team_id": team["team_id"],
