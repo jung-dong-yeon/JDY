@@ -10,10 +10,10 @@ vectorizer = joblib.load(vectorizer_path)
 def get_recommended_teams(user: dict, teams: list):
     results = []
 
-    # 🔹 유저 텍스트 구성 (스킬 + 지역 + 목표)
+    # 🔹 유저 텍스트 구성
     user_text = " ".join(user["skills"] + [user["region"], user["target"]])
 
-    # 🔹 각 팀 텍스트 구성
+    # 🔹 팀 텍스트 구성
     team_texts = [
         " ".join(
             [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
@@ -21,7 +21,7 @@ def get_recommended_teams(user: dict, teams: list):
         ) for team in teams
     ]
 
-    # 🔹 전체 텍스트 벡터화
+    # 🔹 벡터화
     all_texts = [user_text] + team_texts
     vectors = vectorizer.transform(all_texts)
 
@@ -35,7 +35,7 @@ def get_recommended_teams(user: dict, teams: list):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         team_skills_set = set(team_skills)
 
-        # ✅ 양방향 스킬 매칭률 (공정하게)
+        # ✅ 양방향 스킬 매칭률
         user_skill_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
         team_skill_ratio = len(user_skills_set & team_skills_set) / max(len(team_skills_set), 1)
         skill_match_ratio = (user_skill_ratio + team_skill_ratio) / 2
@@ -44,12 +44,16 @@ def get_recommended_teams(user: dict, teams: list):
         region_match = 1.0 if user["region"] == team["region"] else 0.0
         target_match = 1.0 if user["target"] == team["goal"] else 0.0
 
+        # ✅ 💡 팀 스킬 개수 보너스 (최대 0.05)
+        team_skill_bonus = min(len(team_skills_set), 5) * 0.01
+
         # ✅ 최종 점수 계산
         score = round(
             (0.50 * sim_score) +
             (0.28 * skill_match_ratio) +
             (0.17 * region_match) +
-            (0.05 * target_match),
+            (0.05 * target_match) +
+            team_skill_bonus,
             2
         )
 
