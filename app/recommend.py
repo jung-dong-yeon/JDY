@@ -36,12 +36,12 @@ def get_recommended_teams(user: dict, teams: list):
        
         # ✅ 점수 계산
         score = round(
-            (0.8 * sim_score) +
-            (0.15 * skill_match_ratio) +
-            (0.05 * region_match),
+            (0.6 * sim_score) +
+            (0.25 * skill_match_ratio) +
+            (0.15 * region_match),
             2
         )
-        score = min(score, 0.9)  # 최대 점수 제한
+        
 
         results.append({
             "team_id": team["team_id"],
