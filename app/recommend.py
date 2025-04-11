@@ -35,10 +35,9 @@ def get_recommended_teams(user: dict, teams: list):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         team_skills_set = set(team_skills)
 
-        # ✅ 양방향 스킬 매칭 비율 계산 (유저 기준 + 팀 기준 평균)
-        user_to_team_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
-        team_to_user_ratio = len(user_skills_set & team_skills_set) / max(len(team_skills_set), 1)
-        skill_match_ratio = (user_to_team_ratio + team_to_user_ratio) / 2
+        # ✅ 스킬 매칭률 (유저 기준 비율만)
+        skill_match_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
+
 
         # ✅ 지역/목표 일치 여부
         region_match = 1.0 if user["region"] == team["region"] else 0.0
