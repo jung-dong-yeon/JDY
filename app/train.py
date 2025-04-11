@@ -4,7 +4,7 @@ import joblib
 import os
 
 # 샘플 학습 데이터
-data = pd.DataFrame([
+data = pd.DataFrame([   
     {"skill": "프론트엔드", "region": "서울", "target": "경험쌓기"},
     {"skill": "게임 서버", "region": "광주", "target": "상금"},
     {"skill": "그래픽스", "region": "서울", "target": "수상"},
