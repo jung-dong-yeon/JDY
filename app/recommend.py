@@ -10,8 +10,10 @@ vectorizer = joblib.load(vectorizer_path)
 def get_recommended_teams(user: dict, teams: list):
     results = []
 
-    # 유저와 팀 텍스트 구성 (스킬 + 지역 + 목표)
+    # 유저 텍스트: 스킬 + 지역 + 목표
     user_text = " ".join(user["skills"] + [user["region"], user["target"]])
+
+    # 팀 텍스트들
     team_texts = [
         " ".join(
             [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
@@ -19,23 +21,26 @@ def get_recommended_teams(user: dict, teams: list):
         ) for team in teams
     ]
 
-    # 전체 텍스트 벡터화
+    # 전체 벡터화
     all_texts = [user_text] + team_texts
     vectors = vectorizer.transform(all_texts)
 
     user_vector = vectors[0]
     team_vectors = vectors[1:]
-
-    # 코사인 유사도 계산
     similarities = cosine_similarity(user_vector, team_vectors)[0]
 
     for team, sim_score in zip(teams, similarities):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         skill_match_ratio = len(set(user["skills"]) & set(team_skills)) / max(len(team_skills), 1)
+        region_match = 1.0 if user["region"] == team["region"] else 0.0
 
-        # ✅ 점수 계산 (유사도 + 스킬일치율)
-        # 유사도 비중 85%, 스킬 일치 비중 15%로 약간 더 높게 설정
-        score = round(0.9 * sim_score + 0.1 * skill_match_ratio, 2)
+        # ✅ 점수 계산
+        score = round(
+            (0.8 * sim_score) +
+            (0.15 * skill_match_ratio) +
+            (0.05 * region_match),
+            2
+        )
 
         results.append({
             "team_id": team["team_id"],
