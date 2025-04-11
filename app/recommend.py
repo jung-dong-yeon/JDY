@@ -10,7 +10,9 @@ def get_recommended_teams(user: dict, teams: list):
     results = []
 
     user_skills = user["skills"]
-    user_text = " ".join(user_skills + [user["region"], user["target"]])
+    user_region = user["region"]
+    user_target = user["target"]
+    user_text = " ".join(user_skills + [user_region, user_target])
 
     team_texts = [
         " ".join(
@@ -31,11 +33,16 @@ def get_recommended_teams(user: dict, teams: list):
     for team, sim_score in zip(teams, similarities):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         has_skill_match = bool(set(user_skills) & set(team_skills))
+        region_match = user_region == team["region"]
+        target_match = user_target == team["goal"]
 
-        # ✅ 보너스 가중치 (최대 0.2)
-        skill_bonus = 0.1 if has_skill_match else 0.0
-        region_bonus = 0.07 if user["region"] == team["region"] else 0.0
-        target_bonus = 0.03 if user["target"] == team["goal"] else 0.0
+        # ✅ 가중치 설정
+        skill_bonus = 0.25 if has_skill_match else 0.0
+        region_bonus = 0.25 if region_match else 0.0
+        target_bonus = 0.10 if target_match else 0.0
+
+        # ✅ 코사인 유사도 최대치 제한
+        sim_score = min(sim_score, 0.40)
 
         final_score = round(sim_score + skill_bonus + region_bonus + target_bonus, 2)
 
