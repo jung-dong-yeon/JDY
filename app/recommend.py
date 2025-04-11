@@ -33,7 +33,7 @@ def get_recommended_teams(user: dict, teams: list):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         skill_match_ratio = len(set(user["skills"]) & set(team_skills)) / max(len(team_skills), 1)
         region_match = 1.0 if user["region"] == team["region"] else 0.0
-
+       
         # ✅ 점수 계산
         score = round(
             (0.8 * sim_score) +
@@ -41,6 +41,7 @@ def get_recommended_teams(user: dict, teams: list):
             (0.05 * region_match),
             2
         )
+        score = min(score, 0.9)  # 최대 점수 제한
 
         results.append({
             "team_id": team["team_id"],
