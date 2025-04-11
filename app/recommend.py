@@ -3,17 +3,17 @@ import joblib
 import os
 from sklearn.metrics.pairwise import cosine_similarity
 
-# 벡터라이저 로드
+# 🔹 벡터라이저 로드
 vectorizer_path = os.path.join(os.path.dirname(__file__), "vectorizer.pkl")
 vectorizer = joblib.load(vectorizer_path)
 
 def get_recommended_teams(user: dict, teams: list):
     results = []
 
-    # 유저 텍스트: 스킬 + 지역 + 목표
+    # 🔹 유저 텍스트: 스킬 + 지역 + 목표
     user_text = " ".join(user["skills"] + [user["region"], user["target"]])
 
-    # 팀 텍스트들
+    # 🔹 각 팀의 텍스트 생성
     team_texts = [
         " ".join(
             [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
@@ -21,7 +21,7 @@ def get_recommended_teams(user: dict, teams: list):
         ) for team in teams
     ]
 
-    # 전체 벡터화
+    # 🔹 전체 벡터화
     all_texts = [user_text] + team_texts
     vectors = vectorizer.transform(all_texts)
 
@@ -35,15 +35,19 @@ def get_recommended_teams(user: dict, teams: list):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
         team_skills_set = set(team_skills)
 
-        # ✅ 유저 스킬 기준 일치율
-        skill_match_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
+        # ✅ 양방향 스킬 매칭 비율 계산 (유저 기준 + 팀 기준 평균)
+        user_to_team_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
+        team_to_user_ratio = len(user_skills_set & team_skills_set) / max(len(team_skills_set), 1)
+        skill_match_ratio = (user_to_team_ratio + team_to_user_ratio) / 2
+
+        # ✅ 지역/목표 일치 여부
         region_match = 1.0 if user["region"] == team["region"] else 0.0
         target_match = 1.0 if user["target"] == team["goal"] else 0.0
 
-        # ✅ 점수 계산
+        # ✅ 최종 점수 계산 (가중치 변경)
         score = round(
-            (0.6 * sim_score) +
-            (0.2 * skill_match_ratio) +
+            (0.5 * sim_score) +
+            (0.3 * skill_match_ratio) +
             (0.15 * region_match) +
             (0.05 * target_match),
             2
