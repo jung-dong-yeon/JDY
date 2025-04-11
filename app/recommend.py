@@ -29,19 +29,25 @@ def get_recommended_teams(user: dict, teams: list):
     team_vectors = vectors[1:]
     similarities = cosine_similarity(user_vector, team_vectors)[0]
 
+    user_skills_set = set(user["skills"])
+
     for team, sim_score in zip(teams, similarities):
         team_skills = [s.strip() for s in team["recruitment_skill"].split(",") if s.strip()]
-        skill_match_ratio = len(set(user["skills"]) & set(team_skills)) / max(len(team_skills), 1)
+        team_skills_set = set(team_skills)
+
+        # ✅ 유저 스킬 기준 일치율
+        skill_match_ratio = len(user_skills_set & team_skills_set) / max(len(user_skills_set), 1)
         region_match = 1.0 if user["region"] == team["region"] else 0.0
-       
+        target_match = 1.0 if user["target"] == team["goal"] else 0.0
+
         # ✅ 점수 계산
         score = round(
             (0.6 * sim_score) +
-            (0.25 * skill_match_ratio) +
-            (0.15 * region_match),
+            (0.2 * skill_match_ratio) +
+            (0.15 * region_match) +
+            (0.05 * target_match),
             2
         )
-        
 
         results.append({
             "team_id": team["team_id"],
