@@ -4,4 +4,4 @@ pydantic
 scikit-learn
 pandas
 joblib
-matplotlib
+
