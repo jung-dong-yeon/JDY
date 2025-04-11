@@ -35,7 +35,7 @@ def get_recommended_teams(user: dict, teams: list):
 
         # ✅ 점수 계산 (유사도 + 스킬일치율)
         # 유사도 비중 85%, 스킬 일치 비중 15%로 약간 더 높게 설정
-        score = round(0.85 * sim_score + 0.15 * skill_match_ratio, 2)
+        score = round(0.9 * sim_score + 0.1 * skill_match_ratio, 2)
 
         results.append({
             "team_id": team["team_id"],
