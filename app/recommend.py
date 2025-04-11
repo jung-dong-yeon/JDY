@@ -44,7 +44,7 @@ def get_recommended_teams(user: dict, teams: list):
             "team_id": team["team_id"],
             "score": final_score,
             "prediction": 1 if final_score >= 0.5 else 0,
-            "badge": "추천" if final_score >= 0.6 else ""
+            "badge": "추천" if final_score >= 0.65 else ""
         })
 
     return sorted(results, key=lambda x: x["score"], reverse=True)
